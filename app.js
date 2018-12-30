@@ -18,6 +18,9 @@
   const Construction = require('./models/Constructions/construction.routes');
   app.use('/construction', Construction);
 
+  const Image = require('./models/Images/image.routes');
+  app.use('/image', Image);
+
   const portExpress = process.env.EXPRESS_PORT;
   const hostExpress = process.env.EXPRESS_HOST;
 
