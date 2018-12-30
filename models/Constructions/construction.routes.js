@@ -7,6 +7,26 @@ router
   return Construction.getAllConstructions( res, Construction.responseToClient );
 })
 
+.post( '/constructionWithImages', ( req, res ) => {
+  const newConstruction = {
+    id: null,
+    title: req.body.title,
+    description: req.body.description,
+    statu: req.body.statu,
+    address: req.body.address,
+    city: req.body.city,
+    state: req.body.state,
+    start_date: req.body.start_date,
+    finish_date: req.body.finish_date,
+    id_type: req.body.id_type
+  }
+
+  const newImages = req.body.images;
+
+  return Construction.saveConstructionWithImages( newConstruction, newImages, res, Construction.responseToClient);
+
+})
+
 .post( '/', ( req, res ) => {
 
   let newConstruction = {
