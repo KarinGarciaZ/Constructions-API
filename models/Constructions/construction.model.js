@@ -122,7 +122,7 @@ Construction.deleteConstruction = ( idConstruction, res, cb ) => {
       })
 
       let query2 = new Promise( (resolve, reject) => {
-        connection.query( 'UPDATE images SET statusItem = 1 where id_Construction = ?', [idConstruction], ( error, data ) => {
+        connection.query( 'UPDATE images SET statusItem = 1 where id_Constructions = ?', [idConstruction], ( error, data ) => {
           (error)? reject(error) : resolve(data) 
         })
       })
