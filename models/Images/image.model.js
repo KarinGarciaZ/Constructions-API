@@ -31,6 +31,8 @@ Image.saveImageAsync = ( newImage ) => {
   })
 }
 
+/*------------------------------METHODS--------------------------------*/
+
 Image.responseToClient = ( error, res, data, action ) => {
   if ( error )
     res.status(500).json(error);
