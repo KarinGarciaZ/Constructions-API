@@ -2,24 +2,18 @@
 
   const express = require('express');
   const app = express();
-
   const bodyParser = require('body-parser');
-  app.use(bodyParser.json());
-
   const cors = require('cors');
-  app.use(cors());
-
   const env = require('dotenv');
   env.config();
 
-  const Type = require('./models/Types/type.routes');
-  app.use('/type', Type);
+  const adminRoutes = require('./models/admin');
 
-  const Construction = require('./models/Constructions/construction.routes');
-  app.use('/construction', Construction);
+  app.use(bodyParser.json());
 
-  const Image = require('./models/Images/image.routes');
-  app.use('/image', Image);
+  app.use(cors());
+  
+  app.use(adminRoutes);
 
   const portExpress = process.env.EXPRESS_PORT;
   const hostExpress = process.env.EXPRESS_HOST;
