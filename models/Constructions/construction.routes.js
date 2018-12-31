@@ -5,18 +5,18 @@ const Construction = require('./construction.model');
 router
 
 .get( '/getAllConstructionsWithImages', ( req, res ) => {
-  return Construction.getAllConstructionsWithImages( res, Construction.responseToClient );
-} )
-
-.get( '/constructionWithImages/:idConstruction', ( req, res ) => {
-  let idConstruction = req.params.idConstruction;
-  return Construction.getConstructionWidthImagesAndType( idConstruction, res, Construction.responseToClient );
+  return Construction.getAllConstructionsWithImagesAndType( res, Construction.responseToClient );
 } )
 
 .get( '/constructionsPerType/:idType', ( req, res ) => {
   let idType = req.params.idType;
   return Construction.getConstructionsPerType( idType, res, Construction.responseToClient )
 })
+
+.get( '/:idConstruction', ( req, res ) => {
+  let idConstruction = req.params.idConstruction;
+  return Construction.getConstructionWidthImagesAndType( idConstruction, res, Construction.responseToClient );
+} )
 
 .get( '/', ( req, res ) => {
   return Construction.getAllConstructions( res, Construction.responseToClient );
@@ -33,6 +33,7 @@ router
     state: req.body.state,
     start_date: req.body.start_date,
     finish_date: req.body.finish_date,
+    statusItem: 0,
     id_type: req.body.id_type
   }
 
@@ -54,6 +55,7 @@ router
     state: req.body.state,
     start_date: req.body.start_date,
     finish_date: req.body.finish_date,
+    statusItem: 0,
     id_type: req.body.id_type
   }
 

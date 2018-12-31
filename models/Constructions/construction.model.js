@@ -7,18 +7,19 @@ const Construction = {};
 
 Construction.getAllConstructions = ( res, cb ) => {
   if (connection) {
-    connection.query('SELECT * FROM constructions', ( error, data ) => {
+    connection.query('SELECT * FROM constructions WHERE statusItem = 0', ( error, data ) => {
       if ( error ) return cb( error, res );
       return cb( null, res, data, 200 );
     })
   } else return cb( "Error to connect to DB.", res );
 }
 
-Construction.getAllConstructionsWithImages = ( res, cb ) => {
+Construction.getAllConstructionsWithImagesAndType = ( res, cb ) => {
   if (connection) {
     connection.query(`SELECT * FROM constructions 
                       INNER JOIN images on images.id_Constructions = constructions.id
-                      INNER JOIN types on constructions.id_type = types.id`, 
+                      INNER JOIN types on constructions.id_type = types.id
+                      WHERE constructions.statusItem = 0`, 
       async ( error, data ) => {
         if ( error ) return cb( error, res );
         let dataFixed = await Construction.organizeAllConstructionsInner( data );        
@@ -32,12 +33,12 @@ Construction.getConstructionWidthImagesAndType = ( idConstruction, res, cb ) => 
     connection.query(`SELECT * FROM constructions 
                       INNER JOIN images on images.id_Constructions = constructions.id
                       INNER JOIN types on constructions.id_type = types.id
-                      WHERE constructions.id = ?`
+                      WHERE constructions.id = ? AND constructions.statusItem = 0`
                       , [idConstruction], 
     async ( error, data ) => {
 
       if ( error ) return cb( error, res );
-      let dataFixed = await Construction.organizeResponseImagesInner( data );
+      let dataFixed = await Construction.organizeAllConstructionsInner( data );
       return cb( null, res, dataFixed, 200 )
 
     })
@@ -49,7 +50,7 @@ Construction.getConstructionsPerType = ( idType, res, cb ) => {
     connection.query( `SELECT * FROM constructions 
                       INNER JOIN images on images.id_Constructions = constructions.id
                       INNER JOIN types on constructions.id_type = types.id
-                      WHERE constructions.id_type = ?`, [idType], 
+                      WHERE constructions.id_type = ? AND constructions.statusItem = 0`, [idType], 
     async ( error, data ) => {
       if ( error ) return cb( error, res );
       let dataFixed = await Construction.organizeAllConstructionsInner( data );
@@ -134,37 +135,8 @@ Construction.responseToClient = ( error, res, data, action ) => {
     res.status(action).json(data);
 }
 
-Construction.organizeResponseImagesInner = ( data ) => {
-
-  return new Promise( resolve => {
-    let arrayOfImages = data.map( element => {
-      return element.url;
-    })
-  
-    let objectToRes = {
-      id: data[0].id_Constructions,
-      title: data[0].title,
-      description: data[0].description,
-      statu: data[0].statu,
-      address: data[0].address,
-      city: data[0].city,
-      state: data[0].state,
-      start_date: data[0].start_date,
-      finish_date: data[0].finish_date,
-      type: {
-        id: data[0].id_type,
-        name: data[0].name
-      },
-      images: arrayOfImages
-    }
-
-    resolve( objectToRes );
-  
-  })
-}
-
 Construction.organizeAllConstructionsInner = ( data ) => {
-  return new Promise( resolve => {
+    return new Promise( resolve => {
     let ids = data.map( element => element.id_Constructions );
     let uniqueIds = ids.filter( (value, index, self) => self.indexOf( value ) === index );
     let arrayOfConstructionsPerId = uniqueIds.map( element => {
