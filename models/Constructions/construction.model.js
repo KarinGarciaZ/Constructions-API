@@ -5,15 +5,6 @@ const Construction = {};
 
 /*------------------------------GET--------------------------------*/
 
-Construction.getAllConstructions = ( res, cb ) => {
-  if (connection) {
-    connection.query('SELECT * FROM constructions WHERE statusItem = 0', ( error, data ) => {
-      if ( error ) return cb( error, res );
-      return cb( null, res, data, 200 );
-    })
-  } else return cb( "Error to connect to DB.", res );
-}
-
 Construction.getAllConstructionsWithImagesAndType = ( res, cb ) => {
   if (connection) {
     connection.query(`SELECT * FROM constructions 
@@ -60,15 +51,6 @@ Construction.getConstructionsPerType = ( idType, res, cb ) => {
 }
 
 /*------------------------------POST--------------------------------*/
-
-Construction.saveConstruction = ( newConstruction, res, cb ) => {
-  if (connection) {
-    connection.query('INSERT INTO Constructions SET ?', [newConstruction], ( error, data ) => {
-      if ( error ) return cb( error, res );
-      return cb( null, res, data, 201 );
-    })
-  }
-}
 
 Construction.saveConstructionWithImages = ( newConstruction, images, res, cb ) => {
   if (connection) {
