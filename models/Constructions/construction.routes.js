@@ -3,6 +3,17 @@ const router = express.Router();
 const Construction = require('./construction.model');
 
 router
+
+.get( '/constructionWithImages/:idConstruction', ( req, res ) => {
+  let idConstruction = req.params.idConstruction;
+  return Construction.getComstructionWidthImagesAndType( idConstruction, res, Construction.responseToClient );
+} )
+
+.get( '/:idConstruction', ( req, res ) => {
+  let idConstruction = req.params.idConstruction;
+  return Construction.getSingleConstruction( idConstruction, res, Construction.responseToClient );
+})
+
 .get( '/', ( req, res ) => {
   return Construction.getAllConstructions( res, Construction.responseToClient );
 })
@@ -43,6 +54,10 @@ router
   }
 
   return Construction.saveConstruction( newConstruction, res, Construction.responseToClient )
+})
+
+.put( '/:idConstruction', ( req, res ) => {
+
 })
 
 module.exports = router;
