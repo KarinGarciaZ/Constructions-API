@@ -4,14 +4,18 @@ const Construction = require('./construction.model');
 
 router
 
-.get( '/constructionWithImages/:idConstruction', ( req, res ) => {
-  let idConstruction = req.params.idConstruction;
-  return Construction.getComstructionWidthImagesAndType( idConstruction, res, Construction.responseToClient );
+.get( '/getAllConstructionsWithImages', ( req, res ) => {
+  return Construction.getAllConstructionsWithImages( res, Construction.responseToClient );
 } )
 
-.get( '/:idConstruction', ( req, res ) => {
+.get( '/constructionWithImages/:idConstruction', ( req, res ) => {
   let idConstruction = req.params.idConstruction;
-  return Construction.getSingleConstruction( idConstruction, res, Construction.responseToClient );
+  return Construction.getConstructionWidthImagesAndType( idConstruction, res, Construction.responseToClient );
+} )
+
+.get( '/constructionsPerType/:idType', ( req, res ) => {
+  let idType = req.params.idType;
+  return Construction.getConstructionsPerType( idType, res, Construction.responseToClient )
 })
 
 .get( '/', ( req, res ) => {

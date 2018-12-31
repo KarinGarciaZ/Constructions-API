@@ -14,16 +14,20 @@ Construction.getAllConstructions = ( res, cb ) => {
   } else return cb( "Error to connect to DB.", res );
 }
 
-Construction.getSingleConstruction = ( idConstruction, res, cb ) => {
-  if ( connection ) {
-    connection.query('SELECT * FROM constructions WHERE id = ?', [idConstruction], ( error, data ) => {
-      if ( error ) return cb( error, res );
-      return cb( null, res, data, 200 )
+Construction.getAllConstructionsWithImages = ( res, cb ) => {
+  if (connection) {
+    connection.query(`SELECT * FROM constructions 
+                      INNER JOIN images on images.id_Constructions = constructions.id
+                      INNER JOIN types on constructions.id_type = types.id`, 
+      async ( error, data ) => {
+        if ( error ) return cb( error, res );
+        let dataFixed = await Construction.organizeAllConstructionsInner( data );        
+        return cb( null, res, dataFixed, 200 );
     })
   } else return cb( "Error to connect to DB.", res );
 }
 
-Construction.getComstructionWidthImagesAndType = ( idConstruction, res, cb ) => {
+Construction.getConstructionWidthImagesAndType = ( idConstruction, res, cb ) => {
   if ( connection ) {
     connection.query(`SELECT * FROM constructions 
                       INNER JOIN images on images.id_Constructions = constructions.id
@@ -38,6 +42,20 @@ Construction.getComstructionWidthImagesAndType = ( idConstruction, res, cb ) => 
 
     })
   } else return cb( "Error to connect to DB.", res );
+}
+
+Construction.getConstructionsPerType = ( idType, res, cb ) => {
+  if( connection ) {
+    connection.query( `SELECT * FROM constructions 
+                      INNER JOIN images on images.id_Constructions = constructions.id
+                      INNER JOIN types on constructions.id_type = types.id
+                      WHERE constructions.id_type = ?`, [idType], 
+    async ( error, data ) => {
+      if ( error ) return cb( error, res );
+      let dataFixed = await Construction.organizeAllConstructionsInner( data );
+      return cb( null, res, dataFixed, 200 );
+    })
+  }
 }
 
 /*------------------------------POST--------------------------------*/
@@ -142,6 +160,47 @@ Construction.organizeResponseImagesInner = ( data ) => {
 
     resolve( objectToRes );
   
+  })
+}
+
+Construction.organizeAllConstructionsInner = ( data ) => {
+  return new Promise( resolve => {
+    let ids = data.map( element => element.id_Constructions );
+    let uniqueIds = ids.filter( (value, index, self) => self.indexOf( value ) === index );
+    let arrayOfConstructionsPerId = uniqueIds.map( element => {
+      let arrayByElement = data.filter( elementData => {
+        return elementData.id_Constructions === element;
+      });
+      return arrayByElement;
+    });
+
+    let objectToRes = arrayOfConstructionsPerId.map( element => {
+      let arrayOfImages = element.map( construction => {
+        return construction.url;
+      })
+
+      let singleElement = {
+        id: element[0].id_Constructions,
+        title: element[0].title,
+        description: element[0].description,
+        statu: element[0].statu,
+        address: element[0].address,
+        city: element[0].city,
+        state: element[0].state,
+        start_date: element[0].start_date,
+        finish_date: element[0].finish_date,
+        type: {
+          id: element[0].id_type,
+          name: element[0].name
+        },
+        images: arrayOfImages
+      }
+      
+      return singleElement;
+
+    })
+
+    resolve(objectToRes);
   })
 }
 
