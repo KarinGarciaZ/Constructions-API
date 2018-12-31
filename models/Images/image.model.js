@@ -43,7 +43,7 @@ Image.responseToClient = ( error, res, data, action ) => {
 
 Image.getArrayOfImages = ( images, id, cb ) => {
   let imagesPromises = images.map( image => {
-    let newImage = { id: null, id_Constructions: id, url: image }
+    let newImage = { id: null, id_Constructions: id, url: image, statusItem: 0 }
     return cb( newImage );
   })
 

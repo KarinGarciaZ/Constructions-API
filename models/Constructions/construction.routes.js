@@ -43,4 +43,9 @@ router
 
 })
 
+.delete( '/:idConstruction', ( req, res ) => {
+  let idConstruction = req.params.idConstruction;
+  Construction.deleteConstruction( idConstruction, res, Construction.responseToClient );
+} )
+
 module.exports = router;

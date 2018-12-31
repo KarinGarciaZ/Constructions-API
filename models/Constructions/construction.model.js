@@ -10,7 +10,7 @@ Construction.getAllConstructionsWithImagesAndType = ( res, cb ) => {
     connection.query(`SELECT * FROM constructions 
                       INNER JOIN images on images.id_Constructions = constructions.id
                       INNER JOIN types on constructions.id_type = types.id
-                      WHERE constructions.statusItem = 0`, 
+                      WHERE constructions.statusItem = 0 AND images.statusItem = 0`, 
       async ( error, data ) => {
         if ( error ) return cb( error, res );
         let dataFixed = await Construction.organizeAllConstructionsInner( data );        
@@ -24,7 +24,7 @@ Construction.getConstructionWidthImagesAndType = ( idConstruction, res, cb ) => 
     connection.query(`SELECT * FROM constructions 
                       INNER JOIN images on images.id_Constructions = constructions.id
                       INNER JOIN types on constructions.id_type = types.id
-                      WHERE constructions.id = ? AND constructions.statusItem = 0`
+                      WHERE constructions.id = ? AND constructions.statusItem = 0 AND images.statusItem = 0`
                       , [idConstruction], 
     async ( error, data ) => {
 
@@ -41,7 +41,7 @@ Construction.getConstructionsPerType = ( idType, res, cb ) => {
     connection.query( `SELECT * FROM constructions 
                       INNER JOIN images on images.id_Constructions = constructions.id
                       INNER JOIN types on constructions.id_type = types.id
-                      WHERE constructions.id_type = ? AND constructions.statusItem = 0`, [idType], 
+                      WHERE constructions.id_type = ? AND constructions.statusItem = 0 AND images.statusItem = 0`, [idType], 
     async ( error, data ) => {
       if ( error ) return cb( error, res );
       let dataFixed = await Construction.organizeAllConstructionsInner( data );
@@ -106,6 +106,49 @@ Construction.saveConstructionWithImages = ( newConstruction, images, res, cb ) =
 
 Construction.updateConstruction = ( constructionUpdated, res, cb ) => {
   
+}
+
+/*------------------------------DELETE--------------------------------*/
+
+Construction.deleteConstruction = ( idConstruction, res, cb ) => {
+  if ( connection ) {
+    connection.beginTransaction( errorBT => {
+      if (errorBT) return cb( errorBT, res );
+
+      let query1 = new Promise( (resolve, reject) => {
+        connection.query( 'UPDATE constructions SET statusItem = 1 where id = ?', [idConstruction], ( error, data ) => {
+          (error)? reject(error) : resolve(data) 
+        })
+      })
+
+      let query2 = new Promise( (resolve, reject) => {
+        connection.query( 'UPDATE images SET statusItem = 1 where id_Construction = ?', [idConstruction], ( error, data ) => {
+          (error)? reject(error) : resolve(data) 
+        })
+      })
+
+      Promise.all( [query1, query2] )
+      .then( datas => {
+        console.log('datas',datas);
+        connection.commit( errorCommit => {
+          if ( errorCommit ){
+            connection.rollback( () => {
+              return cb( errorCommit, res );
+            })
+          }
+
+          return cb( null, res, datas, 200 )
+        })
+      })
+      .catch( errors => {
+        console.log('errors', errors )
+        connection.rollback( () => {
+          return cb( errors, res )
+        })
+      })
+      
+    })
+  } else return cb( "Error to connect to DB.", res );
 }
 
 /*------------------------------METHODS--------------------------------*/
