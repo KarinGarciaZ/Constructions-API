@@ -2,6 +2,8 @@ const connection = require('../../db_config/mysql-connection');
 
 const Image = {};
 
+/*------------------------------GET--------------------------------*/
+
 Image.getAllImages = ( res, cb ) => {
   if (connection) {
     connection.query('SELECT * FROM Images', ( error, data ) => {
@@ -11,6 +13,8 @@ Image.getAllImages = ( res, cb ) => {
   } else return cb( "Error to connect to DB.", res );
 }
 
+/*------------------------------PUT--------------------------------*/
+
 Image.saveImage = ( newImage, res, cb ) => {
   if (connection) {
     connection.query('INSERT INTO Images SET ?', [newImage], ( error, data ) => {
@@ -18,6 +22,27 @@ Image.saveImage = ( newImage, res, cb ) => {
       return cb( null, res, data, 201 );
     })
   } else return cb( "Error to connect to DB.", res );
+}
+
+/*------------------------------DELETE--------------------------------*/
+
+Image.deleteImage = ( idImage, res, cb ) => {
+  if ( connection ) {
+    connection.query( 'UPDATE Images SET statusItem = 1 where id_image = ?', [idImage], 
+      ( error, data ) => {
+        if ( error ) return cb( error, res );
+        return cb( null, res, data, 200 )
+      })
+  } else return cb( 'Error to connect to DB.', res );
+}
+
+/*------------------------------METHODS--------------------------------*/
+
+Image.responseToClient = ( error, res, data, action ) => {
+  if ( error )
+    res.status(500).json(error);
+  else
+    res.status(action).json(data);
 }
 
 Image.saveImageAsync = ( newImage ) => {
@@ -31,19 +56,9 @@ Image.saveImageAsync = ( newImage ) => {
   })
 }
 
-/*------------------------------METHODS--------------------------------*/
-
-Image.responseToClient = ( error, res, data, action ) => {
-  if ( error )
-    res.status(500).json(error);
-  else
-    res.status(action).json(data);
-}
-
-
 Image.getArrayOfImages = ( images, id, cb ) => {
   let imagesPromises = images.map( image => {
-    let newImage = { id: null, id_Constructions: id, url: image, statusItem: 0 }
+    let newImage = { id_image: null, id_Constructions: id, url: image, statusItem: 0 }
     return cb( newImage );
   })
 
