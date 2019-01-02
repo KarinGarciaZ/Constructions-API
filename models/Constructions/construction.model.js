@@ -129,7 +129,6 @@ Construction.deleteConstruction = ( idConstruction, res, cb ) => {
 
       Promise.all( [query1, query2] )
       .then( datas => {
-        console.log('datas',datas);
         connection.commit( errorCommit => {
           if ( errorCommit ){
             connection.rollback( () => {
@@ -141,7 +140,6 @@ Construction.deleteConstruction = ( idConstruction, res, cb ) => {
         })
       })
       .catch( errors => {
-        console.log('errors', errors )
         connection.rollback( () => {
           return cb( errors, res )
         })
@@ -173,7 +171,7 @@ Construction.organizeAllConstructionsInner = ( data ) => {
 
     let objectToRes = arrayOfConstructionsPerId.map( element => {
       let arrayOfImages = element.map( construction => {
-        return construction.url;
+        return { id_image: construction.id_image, url: construction.url };
       })
 
       let singleElement = {
