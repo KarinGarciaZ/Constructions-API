@@ -20,6 +20,12 @@ Type.saveType = ( newType, res, cb ) => {
   }
 }
 
+Type.updateType = ( typeName, res, cb ) => {
+  if ( connection ) {
+    connection.query( '' )
+  } else return cb( 'Error to connect to DB.', res );
+}
+
 Type.responseToClient = ( error, res, data, action ) => {
   if ( error )
     res.status(500).json(error);

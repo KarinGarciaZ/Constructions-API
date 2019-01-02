@@ -10,7 +10,8 @@ router
 .post( '/', ( req, res ) => {
   let newType = {
     id: null,
-    name: req.body.name
+    name: req.body.name,
+    statusItem: 0
   }
 
   return Type.saveType( newType, res, Type.responseToClient )
