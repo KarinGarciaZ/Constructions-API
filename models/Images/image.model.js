@@ -49,20 +49,30 @@ Image.saveImageAsync = ( newImage ) => {
   return new Promise( (resolve, reject) => {
     if (connection) {
       connection.query('INSERT INTO Images SET ?', [newImage], ( error, data ) => {
-        if ( error ) reject( error );
-        resolve( data );
+        (error)? reject(error) : resolve(data);
       })
     } else reject( "Error to connect to DB." );
   })
 }
 
-Image.getArrayOfImages = ( images, id, cb ) => {
+Image.saveArrayOfImages = ( images, idConstruction, cb ) => {
   let imagesPromises = images.map( image => {
-    let newImage = { id_image: null, id_Constructions: id, url: image, statusItem: 0 }
+    let newImage = { id_image: null, id_Constructions: idConstruction, url: image, statusItem: 0 }
     return cb( newImage );
   })
 
   return imagesPromises;
+}
+
+Image.makeOldImages = ( idConstruction ) => {
+  return new Promise( ( resolve, reject ) => {
+    if( connection ) {
+      connection.query( 'UPDATE Images SET statusItem = 1 where id_Constructions = ?', [idConstruction],
+      ( error, data ) => {
+        (error)? reject(error) : resolve(data);
+      })
+    } else reject('Error to connecr to DB.')
+  })
 }
 
 module.exports = Image;
