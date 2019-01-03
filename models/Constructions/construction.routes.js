@@ -40,7 +40,23 @@ router
 })
 
 .put( '/:idConstruction', ( req, res ) => {
+  const constructionUpdated = {
+    id: req.params.idConstruction,
+    title: req.body.title,
+    description: req.body.description,
+    statu: req.body.statu,
+    address: req.body.address,
+    city: req.body.city,
+    state: req.body.state,
+    start_date: req.body.start_date,
+    finish_date: req.body.finish_date,
+    statusItem: 0,
+    id_type: req.body.id_type
+  }
 
+  const newImages = req.body.images;
+
+  return Construction.updateConstruction( constructionUpdated, newImages, res, Construction.responseToClient )
 })
 
 .delete( '/:idConstruction', ( req, res ) => {

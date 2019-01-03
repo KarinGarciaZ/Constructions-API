@@ -67,7 +67,7 @@ Construction.saveConstructionWithImages = ( newConstruction, images, res, cb ) =
         }         
         else {
 
-          let imagePromises = Image.getArrayOfImages( images, data.insertId, Image.saveImageAsync );
+          let imagePromises = Image.saveArrayOfImages( images, data.insertId, Image.saveImageAsync );
           
           Promise.all( imagePromises )
           .then( images => {
@@ -104,8 +104,48 @@ Construction.saveConstructionWithImages = ( newConstruction, images, res, cb ) =
 
 /*------------------------------PUT--------------------------------*/
 
-Construction.updateConstruction = ( constructionUpdated, res, cb ) => {
-  
+Construction.updateConstruction = ( constructionUpdated, images, res, cb ) => {
+  if ( connection ) {
+    const idConstruction = constructionUpdated.id;
+
+    connection.beginTransaction( errorBT => {
+      if ( errorBT ) return cb( errorBT, res );
+
+      let queryUpdateConstruction = new Promise( ( resolve, reject ) => {
+        connection.query( `UPDATE Constructions SET title = ?, description = ?, statu = ?,
+                          address = ?, city = ?, state = ?, start_date = ?, finish_date = ?,
+                          id_type = ?, statusItem = ? WHERE id = ?`,
+                          [ constructionUpdated.title, constructionUpdated.description, constructionUpdated.statu,
+                            constructionUpdated.address, constructionUpdated.city, constructionUpdated.state,
+                            constructionUpdated.start_date, constructionUpdated.finish_date, constructionUpdated.id_type,
+                            constructionUpdated.statusItem, idConstruction ],
+          ( errorUpdate, data ) => {
+            ( errorUpdate )? reject(errorUpdate) : resolve(data);
+          }
+        )
+      })
+
+      let updateOldImages = Image.makeOldImages( idConstruction );
+      let newImages = Image.saveArrayOfImages( images, idConstruction, Image.saveImageAsync );
+
+      let arrayofPromises = [...newImages];
+      arrayofPromises.push( queryUpdateConstruction );
+      arrayofPromises.push( updateOldImages );
+
+      Promise.all( arrayofPromises )
+      .then( datas => {
+        connection.commit( errorCommit => {
+          if ( errorCommit ) 
+            connection.rollback( () => cb( errorCommit, res ) )
+          return cb( null, res, datas, 201 );
+        })
+      })
+      .catch( errors => {
+        connection.rollback( () => cb( errors, res ) );
+      })
+      
+    })
+  } else return cb( 'Error to connect to DB', res );
 }
 
 /*------------------------------DELETE--------------------------------*/
@@ -160,43 +200,43 @@ Construction.responseToClient = ( error, res, data, action ) => {
 
 Construction.organizeAllConstructionsInner = ( data ) => {
     return new Promise( resolve => {
-    let ids = data.map( element => element.id_Constructions );
-    let uniqueIds = ids.filter( (value, index, self) => self.indexOf( value ) === index );
-    let arrayOfConstructionsPerId = uniqueIds.map( element => {
-      let arrayByElement = data.filter( elementData => {
-        return elementData.id_Constructions === element;
+      let ids = data.map( element => element.id_Constructions );
+      let uniqueIds = ids.filter( (value, index, self) => self.indexOf( value ) === index );
+      let arrayOfConstructionsPerId = uniqueIds.map( element => {
+        let arrayByElement = data.filter( elementData => {
+          return elementData.id_Constructions === element;
+        });
+        return arrayByElement;
       });
-      return arrayByElement;
-    });
 
-    let objectToRes = arrayOfConstructionsPerId.map( element => {
-      let arrayOfImages = element.map( construction => {
-        return { id_image: construction.id_image, url: construction.url };
+      let objectToRes = arrayOfConstructionsPerId.map( element => {
+        let arrayOfImages = element.map( construction => {
+          return { id_image: construction.id_image, url: construction.url };
+        })
+
+        let singleElement = {
+          id: element[0].id_Constructions,
+          title: element[0].title,
+          description: element[0].description,
+          statu: element[0].statu,
+          address: element[0].address,
+          city: element[0].city,
+          state: element[0].state,
+          start_date: element[0].start_date,
+          finish_date: element[0].finish_date,
+          type: {
+            id: element[0].id_type,
+            name: element[0].name
+          },
+          images: arrayOfImages
+        }
+        
+        return singleElement;
+
       })
 
-      let singleElement = {
-        id: element[0].id_Constructions,
-        title: element[0].title,
-        description: element[0].description,
-        statu: element[0].statu,
-        address: element[0].address,
-        city: element[0].city,
-        state: element[0].state,
-        start_date: element[0].start_date,
-        finish_date: element[0].finish_date,
-        type: {
-          id: element[0].id_type,
-          name: element[0].name
-        },
-        images: arrayOfImages
-      }
-      
-      return singleElement;
-
+      resolve(objectToRes);
     })
-
-    resolve(objectToRes);
-  })
 }
 
 
