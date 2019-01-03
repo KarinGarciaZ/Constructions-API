@@ -20,9 +20,12 @@ Type.saveType = ( newType, res, cb ) => {
   }
 }
 
-Type.updateType = ( typeName, res, cb ) => {
+Type.updateType = ( type, res, cb ) => {
   if ( connection ) {
-    connection.query( '' )
+    connection.query( 'UPDATE Types SET name = ? where id = ?', [type.name, type.id], ( error, data ) => {
+      if ( error ) return cb( error, res );
+      return cb( null, res, data, 200 )
+    })
   } else return cb( 'Error to connect to DB.', res );
 }
 

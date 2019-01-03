@@ -30,7 +30,7 @@ Construction.getConstructionWidthImagesAndType = ( idConstruction, res, cb ) => 
 
       if ( error ) return cb( error, res );
       let dataFixed = await Construction.organizeAllConstructionsInner( data );
-      return cb( null, res, dataFixed, 200 )
+      return cb( null, res, dataFixed[0], 200 )
 
     })
   } else return cb( "Error to connect to DB.", res );

@@ -17,4 +17,13 @@ router
   return Type.saveType( newType, res, Type.responseToClient )
 })
 
+.put( '/:idType', ( req, res ) => {
+  let type = {
+    id: req.params.idType,
+    name: req.body.name
+  }
+
+  return Type.updateType( type, res, Type.responseToClient );
+})
+
 module.exports = router;
